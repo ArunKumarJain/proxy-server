@@ -13,7 +13,7 @@ logging.getLogger("urllib3").propagate = False
 
 class ProxyServer(Thread):
 
-    def __init__(self, serverUrl, port, ssl = True, certFile = None, keyFile = None,
+    def __init__(self, serverUrl, port, host = "127.0.0.1", ssl = True, certFile = None, keyFile = None,
                  logDir = DEFAULT_LOG_FOLDER, logFileName = DEFAULT_LOG_FILE_NAME):
         """
         Parameters:
@@ -24,6 +24,7 @@ class ProxyServer(Thread):
         super().__init__()
         self._initialise_logger(logDir = logDir, logFileName = logFileName)
         self.app = Flask(__name__)
+        self.host = host
         self.port = port
         self.app.add_url_rule("/shutdown", view_func = self._shutdown_server)
         self.serverUrl = serverUrl
@@ -55,6 +56,7 @@ class ProxyServer(Thread):
         self.join()
 
     def _proxy(self, **kwargs):
+
         self.logger.debug("Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
                      format(request.path, request.method, request.headers, request.get_data()))
         resp = requests.request(
@@ -81,7 +83,7 @@ class ProxyServer(Thread):
             if self.certFile and self.keyFile:
                 sslContext = (self.certFile, self.keyFile)
 
-        self.app.run(port = self.port, ssl_context = sslContext)
+        self.app.run(host = self.host, port = self.port, ssl_context = sslContext)
 
     def initialise(self):
 
@@ -91,5 +93,7 @@ class ProxyServer(Thread):
         # adding little sleep as start & shutdown mock server very often creates connection problems
         time.sleep(0.5)
 
-        self.app.add_url_rule(rule = "/", view_func = self._proxy, defaults = {"request": request})
-        self.app.add_url_rule(rule = "/<path:path>", view_func = self._proxy, defaults = {"request": request})
+        self.app.add_url_rule(rule = "/", view_func = self._proxy, defaults = {"request": request},
+                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH"])
+        self.app.add_url_rule(rule = "/<path:path>", view_func = self._proxy, defaults = {"request": request},
+                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH"])
