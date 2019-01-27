@@ -5,23 +5,16 @@ from threading import Thread
 import time
 import logging
 
-handler = "api_proxy"
-logFilePath = os.path.join(os.path.dirname(__file__), "{}.log".format(handler))
+DEFAULT_LOG_FOLDER = os.path.dirname(__file__)
+DEFAULT_LOG_FILE_NAME = "api_proxy"
 
 logging.getLogger("werkzeug").propagate = False
 logging.getLogger("urllib3").propagate = False
 
-logger = logging.getLogger(handler)
-logger.setLevel(logging.DEBUG)
-fH = logging.FileHandler(filename = logFilePath, mode = 'w', delay = 0)
-fH.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(message)s")
-fH.setFormatter(formatter)
-logger.addHandler(fH)
-
 class ProxyServer(Thread):
 
-    def __init__(self, serverUrl, port, ssl = True, certFile = None, keyFile = None):
+    def __init__(self, serverUrl, port, ssl = True, certFile = None, keyFile = None,
+                 logDir = DEFAULT_LOG_FOLDER, logFileName = DEFAULT_LOG_FILE_NAME):
         """
         Parameters:
             (str) host: give 0.0.0.0 to have server available externally. Default is 127.0.0.1
@@ -29,6 +22,7 @@ class ProxyServer(Thread):
         """
 
         super().__init__()
+        self._initialise_logger(logDir = logDir, logFileName = logFileName)
         self.app = Flask(__name__)
         self.port = port
         self.app.add_url_rule("/shutdown", view_func = self._shutdown_server)
@@ -36,6 +30,17 @@ class ProxyServer(Thread):
         self.certFile = certFile
         self.keyFile = keyFile
         self.ssl = ssl
+
+    def _initialise_logger(self, logDir, logFileName):
+
+        self.logFilePath = os.path.join(logDir, "{}.log".format(logFileName))
+        self.logger = logging.getLogger(logFileName)
+        self.logger.setLevel(logging.DEBUG)
+        fH = logging.FileHandler(filename = self.logFilePath, mode = 'w', delay = 0)
+        fH.setLevel(logging.DEBUG)
+        formatter = logging.Formatter("%(message)s")
+        fH.setFormatter(formatter)
+        self.logger.addHandler(fH)
 
     def _shutdown_server(self):
 
@@ -50,7 +55,7 @@ class ProxyServer(Thread):
         self.join()
 
     def _proxy(self, **kwargs):
-        logger.debug("Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
+        self.logger.debug("Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
                      format(request.path, request.method, request.headers, request.get_data()))
         resp = requests.request(
             method = request.method,
@@ -65,7 +70,7 @@ class ProxyServer(Thread):
                    if name.lower() not in excluded_headers]
 
         response = Response(resp.content, resp.status_code, headers)
-        logger.debug("Response: {}\n{}\n".format(resp.content, str('-' * 120)))
+        self.logger.debug("Response: {}\n{}\n".format(resp.content, str('-' * 120)))
         return response
 
     def run(self):
