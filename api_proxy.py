@@ -58,7 +58,7 @@ class ProxyServer(Thread):
     def _proxy(self, **kwargs):
 
         self.logger.debug("Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
-                     format(request.path, request.method, request.headers, request.get_data()))
+                     format(request.url, request.method, request.headers, request.get_data()))
         resp = requests.request(
             method = request.method,
             url = request.url.replace(request.host_url, self.serverUrl),
