@@ -6,7 +6,7 @@ import time
 import logging
 
 DEFAULT_LOG_FOLDER = os.path.dirname(__file__)
-DEFAULT_LOG_FILE_NAME = "api_proxy"
+DEFAULT_LOG_FILE_NAME = "proxyserver"
 
 logging.getLogger("werkzeug").propagate = False
 logging.getLogger("urllib3").propagate = False

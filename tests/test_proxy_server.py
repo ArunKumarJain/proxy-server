@@ -1,12 +1,14 @@
 import unittest
 import requests
-import api_proxy
+import sys
+sys.path.append(".")
+import proxyserver
 
 class TestProxyServer(unittest.TestCase):
 
     def setUp(self):
 
-        self.server = api_proxy.ProxyServer(serverUrl = "http://services.groupkt.com/", port = 5001, ssl = False)
+        self.server = proxyserver.ProxyServer(serverUrl = "http://services.groupkt.com/", port = 5001, ssl = False)
         self.server.initialise()
         self.url = "http://127.0.0.1:5001"
 
