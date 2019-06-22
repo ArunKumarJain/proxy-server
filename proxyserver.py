@@ -21,7 +21,7 @@ class ProxyServer(Thread):
             (int) port: port of the web server
         """
 
-        super().__init__()
+        super(ProxyServer, self).__init__()
         self._initialise_logger(logDir = logDir, logFileName = logFileName)
         self.app = Flask(__name__)
         self.host = host
@@ -37,7 +37,7 @@ class ProxyServer(Thread):
         self.logFilePath = os.path.join(logDir, "{}.log".format(logFileName))
         self.logger = logging.getLogger(logFileName)
         self.logger.setLevel(logging.DEBUG)
-        fH = logging.FileHandler(filename = self.logFilePath, mode = 'w', delay = 0)
+        fH = logging.FileHandler(filename = self.logFilePath, mode = 'a', delay = 0)
         fH.setLevel(logging.DEBUG)
         formatter = logging.Formatter("%(message)s")
         fH.setFormatter(formatter)

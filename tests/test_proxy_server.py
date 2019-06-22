@@ -18,6 +18,7 @@ class TestProxyServer(unittest.TestCase):
         self.assertEqual(200, response.status_code)
 
     def test_get_url_params(self):
+
         response = requests.get(self.url + "/country/search?text=un")
         self.assertEqual(200, response.status_code)
 
