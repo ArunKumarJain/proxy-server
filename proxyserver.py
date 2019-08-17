@@ -1,5 +1,6 @@
 import os
 from flask import request, Response, Flask
+from flask_cors import CORS
 import requests
 from threading import Thread
 import time
@@ -24,6 +25,7 @@ class ProxyServer(Thread):
         super(ProxyServer, self).__init__()
         self._initialise_logger(logDir = logDir, logFileName = logFileName)
         self.app = Flask(__name__)
+        CORS(self.app, resources = {r"/api/*": {"origins": "*"}})
         self.host = host
         self.port = port
         self.app.add_url_rule("/shutdown", view_func = self._shutdown_server)
@@ -72,6 +74,7 @@ class ProxyServer(Thread):
                    if name.lower() not in excluded_headers]
 
         response = Response(resp.content, resp.status_code, headers)
+        response.headers['Access-Control-Allow-Origin'] = "*"
         self.logger.debug("Response: {}\n{}\n".format(resp.content, str('-' * 120)))
         return response
 
@@ -94,6 +97,6 @@ class ProxyServer(Thread):
         time.sleep(0.5)
 
         self.app.add_url_rule(rule = "/", view_func = self._proxy, defaults = {"request": request},
-                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH"])
+                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"])
         self.app.add_url_rule(rule = "/<path:path>", view_func = self._proxy, defaults = {"request": request},
-                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH"])
+                              methods = ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"])
