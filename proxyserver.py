@@ -59,8 +59,8 @@ class ProxyServer(Thread):
 
     def _proxy(self, **kwargs):
 
-        self.logger.debug("Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
-                     format(request.url, request.method, request.headers, request.get_data()))
+        self.logger.debug(msg = "Url: '{}'\nMethod: '{}'\nHeaders: '{}'\ndata: {}\n".
+                          format(request.url, request.method, request.headers, request.get_data()))
         resp = requests.request(
             method = request.method,
             url = request.url.replace(request.host_url, self.serverUrl),
@@ -75,7 +75,7 @@ class ProxyServer(Thread):
 
         response = Response(resp.content, resp.status_code, headers)
         response.headers['Access-Control-Allow-Origin'] = "*"
-        self.logger.debug("Response: {}\n{}\n".format(resp.content, str('-' * 120)))
+        self.logger.debug(msg = "Response: {}\n{}\n".format(resp.content, str('-' * 120)))
         return response
 
     def run(self):

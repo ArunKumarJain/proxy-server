@@ -26,12 +26,20 @@ class TestProxyServer(unittest.TestCase):
         response = requests.get(self.url + "/country/get/iso3code/IND")
         self.assertEqual(400, response.status_code)
 
+        # code to remove the callback function which was set of a specific endpoint
+        list(map(lambda rule: self.server.app.url_map._rules.remove(rule) \
+            if str(rule) == "/country/get/<path:path>" else None, self.server.app.url_map._rules))
+
     def test_get_url_params(self):
 
         self.server.app.add_url_rule(rule = "/country/<path:path>", view_func = self._countryCallback,
                                      methods = ["GET"])
         response = requests.get(self.url + "/country/search?text=un")
         self.assertEqual(400, response.status_code)
+
+        # code to remove the callback function which was set of a specific endpoint
+        list(map(lambda rule: self.server.app.url_map._rules.remove(rule) \
+            if str(rule) == "/country/get/<path:path>" else None, self.server.app.url_map._rules))
 
     def tearDown(self):
 
